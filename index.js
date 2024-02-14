@@ -1,5 +1,5 @@
 const net = require("net");
-// const request = require("request");
+const { bufferToHexString, hex_to_ascii } = require("./util/converters");
 
 const port = 9250;
 const host = "0.0.0.0";
@@ -10,8 +10,12 @@ function onClientConnection(sock) {
   sock.on("data", function (rdata) {
     let data = String(rdata);
 
-    console.log("rdata :>> ", rdata);
+    let data_ = bufferToHexString(data);
+    var splittedData = hex_to_ascii(data).split(",");
+
     console.log("data :>> ", data);
+    console.log("data_ :>> ", data_);
+    console.log("splittedData :>> ", splittedData);
   });
 
   sock.on("close", function () {
