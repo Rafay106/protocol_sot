@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Rafay106/tracking-app.git"
+    "url": "git+https://github.com/Rafay106/protocol_sot.git"
   },
   "author": "Muhammad Rafay Siddiqui",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Rafay106/tracking-app/issues"
+    "url": "https://github.com/Rafay106/protocol_sot/issues"
   },
-  "homepage": "https://github.com/Rafay106/tracking-app#readme",
+  "homepage": "https://github.com/Rafay106/protocol_sot#readme",
   "devDependencies": {
     "nodemon": "^3.0.3"
   }
