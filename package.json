@@ -1,0 +1,22 @@
+{
+  "name": "protocol_sot",
+  "version": "1.0.0",
+  "description": "Speedotrack Tracking Application",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Rafay106/tracking-app.git"
+  },
+  "author": "Muhammad Rafay Siddiqui",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Rafay106/tracking-app/issues"
+  },
+  "homepage": "https://github.com/Rafay106/tracking-app#readme",
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  }
+}
