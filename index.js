@@ -1,36 +1,25 @@
 const net = require("net");
-const { bufferToHexString, hex_to_ascii } = require("./util/converters");
+const GPS_DEVICES = require("./devices/config");
+const { writeLog } = require("./util/utilities");
 
-const port = 9250;
 const host = "0.0.0.0";
 
-const server = net.createServer(onClientConnection);
+GPS_DEVICES.forEach((DEVICE) => {
+  const port = DEVICE.port;
 
-function onClientConnection(sock) {
-  sock.on("data", function (rdata) {
-    let data = String(rdata);
+  const server = net.createServer((socket) => {
+    const adapter = new DEVICE.adapter(port, socket);
 
-    let data_ = bufferToHexString(data);
-    var splittedData = hex_to_ascii(data).split(",");
+    socket.on("data", function (data) {
+      writeLog("packets", data.toString("hex"));
+      console.log("data :>> ", data);
 
-    console.log("data :>> ", data);
-    console.log("data_ :>> ", data_);
-    console.log("splittedData :>> ", splittedData);
+      if (data[2] === 17) adapter.login(data);
+      else writeLog("PacketReply", data.toString("ascii"));
+    });
   });
 
-  sock.on("close", function () {
-    console.log(
-      `${sock.remoteAddress}:${sock.remotePort} terminated the connection`
-    );
+  server.listen(port, host, function () {
+    console.log(`Server started on port ${port} at ${host}`);
   });
-
-  sock.on("error", function (error) {
-    console.error(
-      `${sock.remoteAddress}:${sock.remotePort} connection error ${error}`
-    );
-  });
-}
-
-server.listen(port, host, function () {
-  console.log(`Server started on port ${port} at ${host}`);
 });

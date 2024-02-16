@@ -1,8 +1,8 @@
-const gps_server_config = [
+const GPS_DEVICES = [
   {
     port: 9250,
-    device_adapter: require("./adapters/concox"),
+    adapter: require("./adapters/concox"),
   },
 ];
 
-exports.gps_server_config = gps_server_config;
+module.exports = GPS_DEVICES;
