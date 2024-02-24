@@ -1,9 +1,48 @@
 const { bufferToASCII } = require("../../util/utilities");
 const BaseAdapter = require("../BaseAdapter");
+const Device = require("../Device");
 
 class Adapter extends BaseAdapter {
   constructor(name, port, socket) {
     super(name, port, socket);
+  }
+
+  handlePacket(buffer) {
+    if (buffer.length == 17 && buffer[0] == 0x00 && buffer[1] == 0x0f) {
+      try {
+        const { imei } = this.login(buffer);
+        let device = this.findDevice(imei);
+
+        if (!device) {
+          device = new Device(
+            "loc",
+            imei,
+            this.name,
+            "tcp",
+            this.socket.remoteAddress
+          );
+
+          this.addDevice(device.getDeviceData());
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    } else if (
+      buffer[0] == 0x00 &&
+      buffer[1] == 0x00 &&
+      buffer[2] == 0x00 &&
+      buffer[3] == 0x00
+    ) {
+      const dataLength = buffer.readInt32BE(4);
+
+      console.log("dataLength :>> ", dataLength);
+
+      // TODO: Check for errors
+
+      this.payloads.push(this.parse(buffer));
+    } else {
+      this.log(`Unkown Packet (${buffer.length}): ${buffer.toString(hex)}`);
+    }
   }
 
   login(buffer) {
@@ -15,42 +54,50 @@ class Adapter extends BaseAdapter {
   }
 
   parse(buffer) {
-    if (buffer.length == 17 && buffer[0] == 0x00 && buffer[1] == 0x0f) {
-    }
+    const packet = {
+      codecId: buffer.subarray(8, 9).toString("hex"),
+      numOfData1: buffer[9],
+      timestamp: new Date(buffer.readBigInt64BE(10)),
+      priority: buffer[18],
+      lon: buffer.readInt32BE(19) / 1000000,
+      lat: buffer.readInt32BE(23) / 1000000,
+      altitude: buffer.readInt16BE(27),
+      course: buffer.readInt16BE(29),
+      speed: buffer.readInt16BE(32),
+    };
+
+    const io = this.parseIOElement(buffer);
+
+    packet.params = { ...io, gpslev: buffer[31] };
+
+    this.log(`Parsed AVL Packet: ${JSON.stringify(packet)}`);
+
+    return packet;
   }
 
-  handleAVLPacket(buffer) {
-    const dfLen = buffer.subarray(4, 8);
-    const cID = buffer[8];
-    const numData1 = buffer[9];
-    const tstamp = buffer.subarray(10, 18);
-    const priority = buffer[18];
+  parseIOElement(buffer) {
+    const ioId = buffer.readInt16BE(34);
 
-    console.log("dfLen :>> ", dfLen);
-    console.log("cID :>> ", cID);
-    console.log("numData1 :>> ", numData1);
-    console.log("tstamp :>> ", tstamp);
-    console.log("priority :>> ", priority);
+    const result = { ioId };
 
-    // GPS Element
-    const gpsElement = {
-      lon: buffer.subarray(19, 23),
-      lat: buffer.subarray(23, 26),
-      altitude: buffer.subarray(26, 28),
-      angle: buffer.subarray(28, 32),
-      satellites: buffer[32],
-      speed: buffer.subarray(33, 35),
-    };
-    // GPS Element
+    const numOfIO = buffer.readInt16BE(36);
 
-    console.log("gpsElement :>> ", gpsElement);
+    let pointer = 38;
+    let nByteLen = 1;
+    for (let i = 0; i < numOfIO; i++) {
+      const nByte = buffer.readInt16BE(pointer);
+      pointer += 2;
+      for (let j = 0; j < nByte; j++) {
+        const nIOid = buffer.readInt16BE(pointer);
+        pointer += 2;
+        const nIOVal = buffer.subarray(pointer, nByteLen);
+        result[`io${nIOid}`] = nIOVal.toString("ascii");
+        pointer += nByteLen;
+      }
+      nByteLen *= 2;
+    }
 
-    // IO Element
-    const eventID = buffer.subarray(35, 37);
-    const totalIO = buffer.subarray(37, 39);
-    // IO Element
-
-    console.log("object :>> ", object);
+    return result;
   }
 }
 

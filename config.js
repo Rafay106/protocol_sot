@@ -2,12 +2,12 @@ const GPS_DEVICES = [
   {
     name: "transyncais140",
     port: 9250,
-    adapter: require("./TranSync/AIS140"),
+    adapter: require("./Devices/TranSync/AIS140"),
   },
   {
     name: "teltonikacodec8",
     port: 9251,
-    adapter: require("./Teltonika/Codec8"),
+    adapter: require("./Devices/Teltonika/Codec8"),
   },
   // {
   //   name: "ConcoxEG",

@@ -79,7 +79,7 @@ const isError = (chunk, errCheck) => {
   return ret == errCheck;
 };
 
-const sortObject = (object) => {
+const formatParams = (object) => {
   const result = {};
   const keys = Object.keys(object).sort();
 
@@ -87,7 +87,12 @@ const sortObject = (object) => {
     result[key] = object[key];
   }
 
-  object = result;
+  for (const key of Object.keys(result)) {
+    const val = result[key];
+    if (!(val instanceof String)) result[key] = String(val);
+  }
+
+  return result;
 };
 
 module.exports = {
@@ -100,5 +105,5 @@ module.exports = {
   bufferToASCII,
   hex2bin,
   isError,
-  sortObject,
+  formatParams,
 };

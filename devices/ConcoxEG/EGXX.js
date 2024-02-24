@@ -11,6 +11,10 @@ class Adapter extends BaseAdapter {
     super(name, port, socket);
   }
 
+  handlePacket(buffer) {
+    
+  }
+
   login(buffer) {
     if (buffer.length !== 22) {
       throw new Error("InvalidChunkSize: concox.login().InvalidChunkSize");
